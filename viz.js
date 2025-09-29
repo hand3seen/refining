@@ -167,7 +167,7 @@ function draw(){
   pg.fill(0, VIZ.trailAlpha);
   pg.rect(0,0,width,height);
 
-  drawBackground(pg);
+  //drawBackground(pg);
 
   for (let p of particles) p.move();
   for (let i=0;i<particles.length;i++){
