@@ -157,7 +157,7 @@ function draw(){
   // Simple low-band peak punch
   const rise = Math.max(0, bands.bass - lastLow);
   lowRise = lowRise * 0.85 + rise * 0.15;
-  if (lowRise > 0.10 && bands.bass > 0.35){ // tuned thresholds
+  if (lowRise > 0.10 && bands.bass > 0.35){
     e = Math.min(1.6, e + 0.55);
   }
   lastLow = bands.bass;
@@ -173,29 +173,29 @@ function draw(){
   drawBackground(pg);
 
   for (let p of particles) p.move();
-if (mode===0){
-  for (let i=0;i<particles.length;i++){
-    const p = particles[i];
-    p.dot(pg);
-    p.connect(pg, particles.slice(i+1));
-  }
 
-  if (energy > 1.1){
-    push();
-    drawingContext.globalCompositeOperation = 'screen';
-    fill(255, 255, 255, map(energy,1.1,1.6,10,40));
-    rect(0,0,width,height);
-    pop();
+  if (mode===0){
+    for (let i=0;i<particles.length;i++){
+      const p = particles[i];
+      p.dot(pg);
+      p.connect(pg, particles.slice(i+1));
+    }
+    if (energy > 1.1){
+      push();
+      drawingContext.globalCompositeOperation = 'screen';
+      fill(255, 255, 255, map(energy,1.1,1.6,10,40));
+      rect(0,0,width,height);
+      pop();
+    }
+  } else if (mode===1){
+    drawTriangles(pg, energy);
+  } else {
+    drawFlow(pg, energy);
   }
-} else if (mode===1){
-  drawTriangles(pg, energy);
-} else {
-  drawFlow(pg, energy);
-}
-
 
   image(pg, 0, 0);
 
+  // lighter bloom than full-res multi-blit
   if (bloom){
     push();
     drawingContext.globalCompositeOperation = 'screen';
@@ -241,7 +241,6 @@ function drawBanner(){
 }
 
 function drawHUD(levelVis=0){
-  // live meter bar (matches #meter > i in your HTML)
   const meterBar = document.querySelector('#meter > i');
   if (meterBar){
     meterBar.style.width = Math.min(1, levelVis).toFixed(3) * 100 + '%';
@@ -258,9 +257,7 @@ function drawHUD(levelVis=0){
   text(hud, width - 32, height - 33);
 }
 
-/* Hotkeys (visual toggles only) */
-
-// === Triangles + Flow mode helpers ===
+/* === Triangles + Flow mode helpers === */
 let flowSeeds = [];
 let flowInit = false;
 let flowLayer;
@@ -354,7 +351,7 @@ function drawFlow(g, energy){
   for (let s of flowSeeds){
     let x=s.x, y=s.y;
     for (let i=0;i<14;i++){
-      const ang = noise((x+t)*0.002, (y-t)*0.002, t*0.002)*6.283 + energy*0.8;
+      const ang = noise((x+t)*0.002, (y-t)*0.002, t*0.002)*TAU + energy*0.8;
       const sp = 1.2 + energy*1.8;
       const nx = x + Math.cos(ang)*sp;
       const ny = y + Math.sin(ang)*sp;
@@ -362,7 +359,9 @@ function drawFlow(g, energy){
       x=nx; y=ny;
     }
     s.x = x; s.y = y; s.life -= 1;
-    if (s.x< -10 or s.x>width+10 or s.y<-10 or s.y>height+10 or s.life<=0){
+
+    // 🔧 FIX: use JS logical ORs (||), not "or"
+    if (s.x < -10 || s.x > width+10 || s.y < -10 || s.y > height+10 || s.life <= 0){
       s.x = Math.random()*width; s.y = Math.random()*height; s.life = 40 + Math.random()*60;
     }
   }
@@ -372,6 +371,7 @@ function drawFlow(g, energy){
   pop();
 }
 
+/* Hotkeys (visual toggles only) */
 function keyPressed(){
   if (key==='M'||key==='m') mode = (mode+1)%3;
   if (key==='B'||key==='b') bloom = !bloom;
@@ -390,4 +390,8 @@ function windowResized(){
   pg = createGraphics(width, height);
   pg.background(0);
   initParticles();
+
+  // keep Flow mode stable after resize
+  flowInit = false;
+  ensureFlow();
 }
