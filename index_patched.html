@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Headmosh — Split Viz + Audio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+  <style>
+    html,body{margin:0;height:100%;background:#000;font-family:ui-sans-serif,system-ui,Inter,Roboto,Arial;cursor:default}
+    .topbar{position:fixed;left:18px;top:18px;z-index:9;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .panel{background:rgba(0,0,0,.55);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.15);border-radius:12px;color:#e8f3ff;padding:8px 12px;font-size:13px;line-height:1.4;display:flex;gap:10px;align-items:center}
+    .panel select,.panel button{background:rgba(0,0,0,.35);color:#e8f3ff;border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:6px 10px;font-size:13px}
+    .pump-link{background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.15);border-radius:12px;color:#e8f3ff;text-decoration:none;padding:10px 14px;font-size:14px;line-height:1;display:flex;gap:10px;align-items:center}
+    .pump-dot{width:8px;height:8px;border-radius:50%;background:rgb(60,200,255);box-shadow:0 0 12px 4px rgba(60,200,255,.7)}
+    #meter{position:fixed;left:18px;bottom:18px;width:260px;height:10px;background:#111;border:1px solid #333;border-radius:999px;overflow:hidden;z-index:9}
+    #meter > i{display:block;height:100%;width:0;background:linear-gradient(90deg,#27ffbe,#4ca5ff)}
+    .lower-third{position:fixed;left:18px;bottom:42px;z-index:9;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.2);color:#e8f3ff;padding:8px 12px;border-radius:10px;font-size:12px}
+    #pillbar{display:flex;gap:8px;margin-top:6px}
+    .pill{border:1px solid rgba(255,255,255,.15);border-radius:999px;padding:2px 8px;font-size:11px;color:#bfe}
+    #hud{position:fixed;right:18px;bottom:18px;color:#cde;font-size:12px;background:rgba(0,0,0,.5);padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.12)}
+    #drop{position:fixed;right:18px;top:18px;color:#0ff;background:rgba(0,0,0,.5);padding:6px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.12);display:none}
+    #drop.show{display:block;animation:pop 1.2s ease}
+    @keyframes pop{0%{transform:scale(.9);opacity:.6}30%{transform:scale(1.06);opacity:1}100%{transform:scale(1);opacity:.7}}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a id="coinUrl" class="pump-link" target="_blank" rel="noreferrer">
+      <span class="pump-dot"></span>
+      <span id="coinText">pump.fun/coin/4QCQAkcKiYPnFWsSgGMuGeQdnrAmCKcNJkd2dm59pump</span>
+    </a>
+    <div class="panel">
+      <span>Mic:</span>
+      <select id="mic"><option>Loading…</option></select>
+      <button id="start">Start</button>
+      <button id="stop">Stop</button>
+      <span id="status" style="opacity:.8">idle</span>
+    </div>
+    <div class="panel">
+      <span>Palette:</span>
+      <button onclick="HM_onPalette('default')">Default</button>
+      <button onclick="HM_onPalette('neon')">Neon</button>
+      <button onclick="HM_onPalette('ember')">Ember</button>
+      <button onclick="HM_onPalette('mono')">Mono</button>
+    </div>
+  </div>
+
+  <div class="lower-third">
+    <div><b>HEADMOSH STUDIO</b> — Go Head-First.</div>
+    <div id="pillbar">
+      <div class="pill" id="pill-bass">bass 0.00</div>
+      <div class="pill" id="pill-mids">mids 0.00</div>
+      <div class="pill" id="pill-highs">highs 0.00</div>
+    </div>
+  </div>
+
+  <div id="meter"><i id="bar"></i></div>
+  <div id="hud">Hotkeys: [1–4] Palettes • [Space] Burst • [D] Drop</div>
+  <div id="drop">DROP!</div>
+
+  <script src="./audio.js"></script>
+  <script src="./viz.js"></script>
+  <script>
+    (function(){
+      const p = new URLSearchParams(location.search);
+      const coin = p.get('coin') || "https://pump.fun/coin/4QCQAkcKiYPnFWsSgGMuGeQdnrAmCKcNJkd2dm59pump";
+      document.getElementById('coinText').textContent = coin.replace(/^https?:\/\//,'');
+      document.getElementById('coinUrl').href = coin;
+    })();
+  </script>
+
+<script>
+  (function(){
+    try {
+      const q = new URLSearchParams(location.search);
+      if (q.get('clean') === '1') {
+        for (const sel of ['.topbar','.lower-third','#meter','#hud','#controls','.controls','.ui']) {
+          const el = document.querySelector(sel);
+          if (el) el.style.display = 'none';
+        }
+        document.body.style.cursor = 'none';
+      }
+    } catch(e){}
+  })();
+</script>
+
+<script>
+  (function(){
+    try {
+      const q = new URLSearchParams(location.search);
+      if (q.get('burst')) {
+        localStorage.setItem('hm_burst', Date.now().toString());
+      }
+    } catch(e){}
+  })();
+</script>
+
+</body>
+</html>
