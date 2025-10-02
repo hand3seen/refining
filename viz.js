@@ -128,15 +128,15 @@ function initParticles(){
   for (let i=0;i<count;i++) particles.push(new Particle());
 }
 
-function drawBackground(g){
-  const cx = width*0.5 + Math.sin(t*0.0012)*80*(0.6+energy);
-  const cy = height*0.5 + Math.cos(t*0.0011)*60*(0.6+energy);
-  for (let r = Math.max(width,height); r>0; r -= 7){
-    const k = map(r, 0, Math.max(width,height), 0, 1);
-    const v = 10 + 26*(1-k)*(0.5+0.5*Math.sin(t*0.002+energy*3.2));
-    g.noStroke();
-    g.fill(v, v*0.8, v*0.9, 16);
-    g.circle(cx, cy, r*2);
+//function drawBackground(g){
+//  const cx = width*0.5 + Math.sin(t*0.0012)*80*(0.6+energy);
+//  const cy = height*0.5 + Math.cos(t*0.0011)*60*(0.6+energy);
+ // for (let r = Math.max(width,height); r>0; r -= 7){
+ //   const k = map(r, 0, Math.max(width,height), 0, 1);
+ //   const v = 10 + 26*(1-k)*(0.5+0.5*Math.sin(t*0.002+energy*3.2));
+  //  g.noStroke();
+  //  g.fill(v, v*0.8, v*0.9, 16);
+  //  g.circle(cx, cy, r*2);
   }
 }
 
@@ -170,7 +170,7 @@ function draw(){
   pg.fill(0, VIZ.trailAlpha);
   pg.rect(0,0,width,height);
 
-  drawBackground(pg);
+  //drawBackground(pg);
 
   for (let p of particles) p.move();
 
@@ -283,7 +283,7 @@ function resetFlow(){
 
 function drawTriangles(g, energy){
   const nodes = [];
-  const step = Math.max(4, (particles.length/120)|0);
+  const step = Math.max(2, (particles.length/200)|0);
   for (let i=0; i<particles.length; i+=step){
     nodes.push(particles[i]);
   }
